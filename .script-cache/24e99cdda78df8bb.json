@@ -1,0 +1,170 @@
+{
+  "topic": "why we procrastinate",
+  "title": "Why Your Brain Fights You When You Try To Start",
+  "description": "Procrastination isn't laziness — it's your brain protecting itself from discomfort. This video breaks down the psychology behind why we delay, and what you can actually do about it. Backed by research, explained simply.",
+  "tags": [
+    "psychology",
+    "procrastination",
+    "self-improvement",
+    "motivation",
+    "mental health",
+    "productivity",
+    "neuroscience",
+    "habits",
+    "anxiety",
+    "behavior"
+  ],
+  "music_bed": "assets/music/bed.mp3",
+  "scenes": [
+    {
+      "index": 1,
+      "narration": "You sit down to do the thing. And then, somehow, an hour disappears.",
+      "image_prompt": "A figure sitting at a desk, staring blankly at an open laptop, chin resting in one hand, a clock on the wall behind them."
+    },
+    {
+      "index": 2,
+      "narration": "You check your phone. You reorganize your desk. You get a glass of water you didn't really want.",
+      "image_prompt": "A figure standing at a kitchen counter holding a glass, looking distant, a desk visible in the background."
+    },
+    {
+      "index": 3,
+      "narration": "This isn't laziness. Lazy people don't feel guilty. You do.",
+      "image_prompt": "A figure sitting on a couch hugging their knees, a thought bubble above showing a laptop with an unfinished document."
+    },
+    {
+      "index": 4,
+      "narration": "Procrastination is an emotion management problem, not a time management problem.",
+      "image_prompt": "A figure standing next to two doors — one labeled with a clock, the other with a heart — choosing neither."
+    },
+    {
+      "index": 5,
+      "narration": "When a task feels threatening in some way, your brain triggers discomfort to keep you away from it.",
+      "image_prompt": "A figure backing away from a large glowing document on a pedestal, hands raised defensively."
+    },
+    {
+      "index": 6,
+      "narration": "That discomfort could be fear of failure, fear of judgment, or simply the unpleasant effort of starting.",
+      "image_prompt": "A figure standing at the base of a very tall staircase, looking up with slumped shoulders."
+    },
+    {
+      "index": 7,
+      "narration": "The brain's job is to protect you from pain — and right now, that task feels like pain.",
+      "image_prompt": "A figure with a small shield standing between themselves and a looming pile of papers."
+    },
+    {
+      "index": 8,
+      "narration": "So it offers you an escape hatch. Something easy. Something that feels good right now.",
+      "image_prompt": "A figure being pulled toward a glowing phone by a dotted arrow, while a desk sits untouched to the side."
+    },
+    {
+      "index": 9,
+      "narration": "That relief is real. Neuroscience confirms that avoiding a stressful task genuinely reduces anxiety — briefly.",
+      "image_prompt": "A figure exhaling with a relaxed posture after turning away from a large task board."
+    },
+    {
+      "index": 10,
+      "narration": "But the task is still there. And now there's guilt layered on top.",
+      "image_prompt": "A figure glancing back over their shoulder at the same task board, now with a shadow cast over it."
+    },
+    {
+      "index": 11,
+      "narration": "That guilt makes the task feel even more threatening the next time you look at it.",
+      "image_prompt": "A figure sitting far from a desk, the gap between them and the desk slightly larger than before."
+    },
+    {
+      "index": 12,
+      "narration": "This is the procrastination loop. Avoidance creates guilt. Guilt creates more avoidance.",
+      "image_prompt": "A figure walking in a small circle, with arrows showing a repeating loop between a couch and a desk."
+    },
+    {
+      "index": 13,
+      "narration": "Researchers like Dr. Fuschia Sirois call this the present-bias trap — we weight today's comfort over tomorrow's consequences.",
+      "image_prompt": "A figure on a seesaw, the present side heavy and low, the future side high and light."
+    },
+    {
+      "index": 14,
+      "narration": "Your future self feels like a stranger. It's easy to hand them all your problems.",
+      "image_prompt": "A figure handing a heavy bag to a shadowy outline of another figure standing in the distance."
+    },
+    {
+      "index": 15,
+      "narration": "Perfectionism makes it worse. If you believe it must be perfect, starting means risking imperfection.",
+      "image_prompt": "A figure holding a pencil frozen in front of a blank canvas, pencil never touching the surface."
+    },
+    {
+      "index": 16,
+      "narration": "So not starting keeps the dream of doing it perfectly alive — safe inside your head where no one can judge it.",
+      "image_prompt": "A figure with a glowing lightbulb floating above their head, looking content, while a blank notebook sits closed in front of them."
+    },
+    {
+      "index": 17,
+      "narration": "There's also something called task aversion — some tasks feel boring, meaningless, or just deeply unpleasant.",
+      "image_prompt": "A figure poking at a dull-looking document with a stick from a distance, expression flat."
+    },
+    {
+      "index": 18,
+      "narration": "The brain assigns a cost to starting. If the cost feels high, you don't start.",
+      "image_prompt": "A figure standing at a door with a heavy toll booth in front of it, pockets turned out and empty."
+    },
+    {
+      "index": 19,
+      "narration": "Chronic procrastinators often carry higher levels of stress, anxiety, and regret over time.",
+      "image_prompt": "A figure carrying three stacked boulders labeled with simple symbols for stress, worry, and time lost."
+    },
+    {
+      "index": 20,
+      "narration": "But here's what matters — none of this means you're broken. It means you're human.",
+      "image_prompt": "A figure looking in a small mirror, the reflection looking back calmly and evenly."
+    },
+    {
+      "index": 21,
+      "narration": "The first step out of the loop is noticing the feeling without judging yourself for having it.",
+      "image_prompt": "A figure sitting quietly, one hand placed over their chest, eyes gently downcast."
+    },
+    {
+      "index": 22,
+      "narration": "Name what the task makes you feel. Dread? Boredom? Overwhelm? Naming it weakens its grip.",
+      "image_prompt": "A figure writing a single word on a small notepad, expression becoming steadier."
+    },
+    {
+      "index": 23,
+      "narration": "Next, shrink the task until it no longer feels threatening. Not the whole report — just one sentence.",
+      "image_prompt": "A figure slicing a large boulder into a tiny pebble with one clean motion of a hand."
+    },
+    {
+      "index": 24,
+      "narration": "Behavioral science calls this implementation intention — deciding exactly when, where, and how you'll begin.",
+      "image_prompt": "A figure placing a small flag on a calendar date, with a simple checklist beneath it."
+    },
+    {
+      "index": 25,
+      "narration": "The act of writing down a specific plan makes you two to three times more likely to follow through.",
+      "image_prompt": "A figure confidently walking through a door that had previously been shown closed."
+    },
+    {
+      "index": 26,
+      "narration": "You can also borrow motivation from your values — why does this task actually matter to you?",
+      "image_prompt": "A figure looking up at a simple drawing of what they care about — a person, a home, a goal."
+    },
+    {
+      "index": 27,
+      "narration": "Connecting a task to meaning changes how the brain codes it. It becomes worth the discomfort.",
+      "image_prompt": "A figure stepping toward the desk with a calm, upright posture, a subtle path drawn on the floor ahead of them."
+    },
+    {
+      "index": 28,
+      "narration": "Self-compassion is also a tool. Research by Dr. Michael Wohl found that forgiving yourself for past procrastination reduces future procrastination.",
+      "image_prompt": "A figure placing one hand gently on a smaller version of themselves sitting on the ground."
+    },
+    {
+      "index": 29,
+      "narration": "You don't have to earn the right to begin by suffering enough. You just have to begin.",
+      "image_prompt": "A figure placing a pencil to paper, the very first mark appearing, a small ripple emanating from it."
+    },
+    {
+      "index": 30,
+      "narration": "Your brain is not your enemy. It was just trying to protect you. Now you can show it a safer way forward.",
+      "image_prompt": "A figure sitting at a desk working calmly, a small heart drawn above their head, the clock on the wall showing time still moving."
+    }
+  ]
+}
