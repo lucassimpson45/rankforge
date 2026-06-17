@@ -2,7 +2,7 @@ import { runPipeline } from "@/lib/pipeline";
 import type { SsePayload } from "@/lib/types";
 
 export const runtime = "nodejs";
-export const maxDuration = 600;
+export const maxDuration = 300;
 
 function encodeSse(data: SsePayload): Uint8Array {
   const payload = `data: ${JSON.stringify(data)}\n\n`;

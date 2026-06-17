@@ -39,6 +39,9 @@ const FPS = 30;
 const INTRO_DUR = 1.6;
 const OUTRO_DUR = 2.2;
 
+// Voiceover gain in the final ffmpeg mix (tune without hunting filter flags)
+const VOICEOVER_VOLUME = 2.0;
+
 // Rank → accent colour (drawtext 0xRRGGBB). #1 is gold.
 const RANK_HEX: Record<number, string> = {
   1: "0xFFD23F",
@@ -1160,7 +1163,7 @@ async function finalMix(
     // Combine the timed VO lines into one track.
     voEvents.forEach((v, j) => {
       const ms = Math.max(0, Math.round(v.at * 1000));
-      chains.push(`[${voIdx[j]}:a]adelay=${ms}|${ms},volume=1.0[vl${j}]`);
+      chains.push(`[${voIdx[j]}:a]adelay=${ms}|${ms},volume=${VOICEOVER_VOLUME}[vl${j}]`);
     });
     if (voEvents.length === 1) {
       chains.push(`[vl0]asplit=2[vosc][vomix]`);
