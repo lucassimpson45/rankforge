@@ -51,13 +51,19 @@ const RANK_HEX: Record<number, string> = {
   5: "0xFF5C8A",
 };
 
+function isVercel(): boolean {
+  return process.env.VERCEL === "1";
+}
+
 function projectPublicOutput(): string {
+  if (isVercel()) return `${WORK_ROOT}/output`;
   return path.join(process.cwd(), "public", "output");
 }
 function projectAssets(): string {
   return path.join(process.cwd(), "public", "assets");
 }
 function voCacheDir(): string {
+  if (isVercel()) return `${WORK_ROOT}/vo-cache`;
   return path.join(process.cwd(), ".vo-cache");
 }
 
