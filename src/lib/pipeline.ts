@@ -321,13 +321,17 @@ STEP 1 — Read the topic's INTENT before picking anything:
 
 STEP 2 — Pick EXACTLY 5 distinct, specific, well-known moments that each strongly deliver the emotion. Prefer variety (don't pick 5 of the same sub-type). Rank 1 = the single most viral / strongest example.
 
-STEP 3 — For EACH moment, define the SEGMENT to show. The segment must be built around the single highest-action PEAK moment — the goal, the skill move, the dunk, the finish, the celebration — NOT the buildup or the aftermath:
-- First identify that ONE peak moment in the clip. This is the target moment.
-- The segment must START 1-2 seconds BEFORE the peak so there is only minimal buildup context.
-- The segment must END 1-2 seconds AFTER the peak so it captures the immediate reaction/celebration.
-- The peak must land in the MIDDLE THIRD of the segment — never at the very start and never at the very end.
-- If a typical clip from this query is too short to apply this 1-2s-before / 1-2s-after logic, just use the full clip.
-- Encode this with clipDuration (the segment length in seconds) and peakOffsetPct (where the peak sits inside that segment).
+STEP 3 — For EACH moment, define the SEGMENT to show. The target moment is the DECISIVE SCORING/FINISHING ACTION ITSELF — for a goal it is the SHOT being struck and the BALL HITTING THE NET; for other sports the equivalent finish (the dunk, the touchdown catch, the buzzer-beater release). It is NEVER the buildup, the run without the ball, or the standalone aftermath.
+- First identify that ONE decisive action in the clip. This is the target moment.
+- Valid segment content, IN ORDER of preference:
+  1. The shot/strike itself + the ball hitting the net (ideal).
+  2. The dribble/drive leading DIRECTLY into the shot — at most 3 seconds of buildup before the strike.
+  3. The immediate celebration — ONLY if the shot itself is not present in the available footage.
+- INVALID content — if a clip contains ONLY these, treat it as the wrong moment and prefer a different specific moment/query instead: a player running without the ball, pre-game warmup or training, a coach or pundit speaking, a celebration with no goal preceding it, or crowd-only shots.
+- The decisive action must appear in the FIRST HALF of the segment, with the reaction/celebration filling the second half.
+- If a typical clip from this query is too short to apply this logic, just use the full clip.
+- If the action cannot plausibly be sourced as a real standalone clip, pick a DIFFERENT specific moment instead of settling for buildup/aftermath footage.
+- Encode this with clipDuration (the segment length in seconds) and peakOffsetPct (where the decisive action sits inside that segment).
 
 Return ONLY valid JSON (no markdown, no commentary):
 {
@@ -348,11 +352,11 @@ Return ONLY valid JSON (no markdown, no commentary):
 Rules:
 - EXACTLY 5 items, ranks 1-5.
 - "title" is burned on screen as the rank label: 2-4 words, no punctuation. It must LITERALLY describe what is visible in that exact clip — plain and accurate, NOT exaggerated. (If a ref only points, say "REF POINTS", not "REF GETS TRUCKED". Don't invent objects/actions that may not be on screen.)
-- searchQuery: a SPECIFIC, moment-focused phrase that surfaces the exact high-quality clip of THAT single peak moment — NOT a generic topic search. Bare topic queries like "Messi goals" or "NFL fails" return compilations/montages, never one clean moment, so AVOID them. Instead anchor to the precise moment and add the identifying + quality context that narrows to the real clip: PERSON + SPECIFIC ACTION + the helpful qualifiers among opponent / year / "close up" / "full HD" / "slow motion" (e.g. "Messi goal vs Real Madrid 2017 close up", "Messi dribble skill move full HD", "Mark Sanchez butt fumble slow motion"). Pick only moments specific/famous enough that a real standalone clip exists.
-- We want the RAW ACTION footage of the moment itself — NOT commentary, analysis, reaction videos, podcasts, or award/voting pages. Never include words like "analysis", "reaction", "react", "award", "vote", "puskas", "debate", "explained".
+- searchQuery: search for the SPECIFIC scoring/finishing moment ITSELF, never the player or the general topic. For a goal use the format "[player] goal vs [opponent] [year] [competition]" (e.g. "Messi goal vs Chelsea 2012 Champions League"); apply the equivalent specific form for other sports. Add "full HD" or "original broadcast" to bias toward real match footage. Each of the 5 queries must target a DIFFERENT specific moment — five different goals/finishes, never five variants of the same one.
+- NEVER search for compilations, "top 5"/"top 10", "best goals", highlight reels, montages, warmups, training, or interviews — these always return the wrong moments. NEVER include words like "analysis", "reaction", "react", "award", "vote", "puskas", "debate", "explained", "compilation", "highlights", "top 10". We want the RAW broadcast footage of the moment itself — not commentary, podcasts, or award/voting pages.
 - Every searchQuery and title must obviously match the EMOTION word from STEP 1. If you can't justify why it's e.g. funny, pick a different moment.
 - clipDuration: integer seconds 5-7 only.
-- peakOffsetPct: where the single highest-action PEAK moment lands as a % through the chosen segment. Aim for the MIDDLE THIRD (≈ 34-66) so there is 1-2s of buildup before it and 1-2s of reaction after it — never put the peak at the very start or very end of the segment.`,
+- peakOffsetPct: where the decisive scoring/finishing action lands as a % through the chosen segment. Place it in the FIRST HALF (≈ 25-45) so at most a few seconds of buildup precede the action and the reaction/celebration fills the second half — never put it at the very end.`,
       },
     ],
   });
