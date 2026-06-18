@@ -245,6 +245,75 @@ async function findAudioPeak(inputPath: string): Promise<number | null> {
   return Number.isFinite(bestRms) ? bestTime : null;
 }
 
+// Crowd-noise spike detector. Within a [winStart, winEnd] slice of the source,
+// find the sharpest sudden INCREASE in short-window RMS loudness — i.e. the
+// moment the crowd pops (goal / buzzer-beater / big play), which is the biggest
+// *jump* in volume, not merely the loudest point. Input-seeks so only the window
+// is decoded. Returns the absolute timestamp (s) of the spike, or null when
+// there's no clear jump (flat audio) so the caller can fall back to the hint.
+const SPIKE_MIN_DB = 5; // minimum RMS jump (dB) over ~0.5s to count as a pop
+
+async function findVolumeSpike(
+  inputPath: string,
+  winStart: number,
+  winEnd: number,
+): Promise<number | null> {
+  const dur = winEnd - winStart;
+  if (!(dur > 0.5)) return null;
+
+  const res = await runCmdStdout("ffmpeg", [
+    "-hide_banner",
+    "-nostats",
+    "-ss",
+    winStart.toFixed(3),
+    "-i",
+    inputPath,
+    "-t",
+    dur.toFixed(3),
+    "-map",
+    "0:a:0",
+    "-af",
+    "aresample=44100,asetnsamples=n=22050:p=0,astats=metadata=1:reset=1,ametadata=print:key=lavfi.astats.Overall.RMS_level:file=-",
+    "-f",
+    "null",
+    "-",
+  ]).catch(() => null);
+  if (!res) return null;
+
+  // Per-window (time, rms) samples. With input seek, pts_time restarts near 0,
+  // so add winStart back to recover the absolute timestamp.
+  const samples: { t: number; rms: number }[] = [];
+  let curTime: number | null = null;
+  for (const line of res.stdout.split("\n")) {
+    const tMatch = line.match(/pts_time:([0-9.]+)/);
+    if (tMatch) {
+      curTime = parseFloat(tMatch[1]);
+      continue;
+    }
+    const rMatch = line.match(/RMS_level=(-?[0-9.]+|-?inf)/i);
+    if (rMatch && curTime !== null) {
+      const rms = rMatch[1].toLowerCase().includes("inf")
+        ? -120
+        : parseFloat(rMatch[1]);
+      samples.push({ t: curTime, rms });
+    }
+  }
+  if (samples.length < 3) return null;
+
+  // Largest positive jump between consecutive ~0.5s windows = the crowd pop.
+  let bestJump = -Infinity;
+  let bestTime: number | null = null;
+  for (let i = 1; i < samples.length; i++) {
+    const jump = samples[i].rms - samples[i - 1].rms;
+    if (jump > bestJump) {
+      bestJump = jump;
+      bestTime = samples[i].t;
+    }
+  }
+  if (bestTime === null || bestJump < SPIKE_MIN_DB) return null;
+  return clamp(winStart + bestTime, winStart, winEnd);
+}
+
 /* ───────────────────────── drawtext escaping ─────────────────────────── */
 
 // Escape a literal string for use inside a single-quoted drawtext `text='…'`
@@ -966,21 +1035,55 @@ async function renderClip(
   const { duration: src, hasAudio } = await probeMedia(inputPath);
 
   // Choose the trim window so it reliably contains the highlight.
+  //
+  // Two-stage signal: Claude's peakOffsetPct says roughly WHERE the finish is,
+  // and a crowd-noise VOLUME SPIKE inside that window pinpoints the EXACT moment
+  // (a goal/buzzer-beater makes the crowd pop). peakOffsetPct narrows the search
+  // window; the spike timestamp is the real cut anchor. We place the anchor ~40%
+  // into the window (some buildup before, more reaction after), then shift inward
+  // (never past the video end) to stay in-bounds.
   let start = 0;
   let how = "start";
   if (src > durationSecs + 0.5) {
-    const peak = hasAudio ? await findAudioPeak(inputPath) : null;
-    if (peak !== null) {
-      // Place the loud moment ~62% in: lead-up before, payoff + reaction after.
-      start = clamp(peak - durationSecs * 0.62, 0, src - durationSecs - 0.3);
-      how = `audio-peak@${peak.toFixed(1)}s`;
-    } else if (src <= 30) {
-      start = Math.max(0, (src - durationSecs) / 2);
-      how = "center";
+    const maxStart = src - durationSecs;
+    const hasPeakHint = Number.isFinite(peakOffsetPct) && peakOffsetPct > 0;
+
+    if (hasPeakHint) {
+      const peakTime = src * (peakOffsetPct / 100);
+      // Search window = peakOffsetPct position ± 17.5% of source duration.
+      const winRadius = src * 0.175;
+      const winStart = clamp(peakTime - winRadius, 0, src);
+      const winEnd = clamp(peakTime + winRadius, 0, src);
+      const spike = hasAudio
+        ? await findVolumeSpike(inputPath, winStart, winEnd)
+        : null;
+      if (spike !== null) {
+        start = clamp(spike - durationSecs * 0.4, 0, maxStart);
+        how = `spike@${spike.toFixed(1)}s(peak${peakOffsetPct}%)`;
+      } else {
+        // No clear spike in-window → use peakOffsetPct directly (prior behavior).
+        start = clamp(peakTime - durationSecs * 0.4, 0, maxStart);
+        how = `peak${peakOffsetPct}%@${peakTime.toFixed(1)}s`;
+      }
     } else {
-      const hint = src * (peakOffsetPct / 100);
-      start = clamp(hint - durationSecs * 0.4, 0, src - durationSecs - 0.5);
-      how = `hint${peakOffsetPct}%`;
+      // No usable hint: full-clip audio peak, else center.
+      const peak = hasAudio ? await findAudioPeak(inputPath) : null;
+      if (peak !== null) {
+        start = clamp(peak - durationSecs * 0.4, 0, maxStart);
+        how = `audio-peak@${peak.toFixed(1)}s`;
+      } else {
+        start = Math.max(0, maxStart / 2);
+        how = "center";
+      }
+    }
+
+    // Sanity guard: the opening minutes of a long broadcast (kickoff, warmups,
+    // crowd shots) are never the highlight. If we landed in the first 10% of a
+    // 3-min+ source, snap back to the peakOffsetPct position instead.
+    if (src > 180 && start < src * 0.1) {
+      const peakTime = hasPeakHint ? src * (peakOffsetPct / 100) : src * 0.5;
+      start = clamp(peakTime - durationSecs * 0.4, src * 0.1, maxStart);
+      how += "+openingGuard";
     }
   }
   log(
