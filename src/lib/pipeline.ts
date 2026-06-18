@@ -321,6 +321,14 @@ STEP 1 — Read the topic's INTENT before picking anything:
 
 STEP 2 — Pick EXACTLY 5 distinct, specific, well-known moments that each strongly deliver the emotion. Prefer variety (don't pick 5 of the same sub-type). Rank 1 = the single most viral / strongest example.
 
+STEP 3 — For EACH moment, define the SEGMENT to show. The segment must be built around the single highest-action PEAK moment — the goal, the skill move, the dunk, the finish, the celebration — NOT the buildup or the aftermath:
+- First identify that ONE peak moment in the clip. This is the target moment.
+- The segment must START 1-2 seconds BEFORE the peak so there is only minimal buildup context.
+- The segment must END 1-2 seconds AFTER the peak so it captures the immediate reaction/celebration.
+- The peak must land in the MIDDLE THIRD of the segment — never at the very start and never at the very end.
+- If a typical clip from this query is too short to apply this 1-2s-before / 1-2s-after logic, just use the full clip.
+- Encode this with clipDuration (the segment length in seconds) and peakOffsetPct (where the peak sits inside that segment).
+
 Return ONLY valid JSON (no markdown, no commentary):
 {
   "topicViralityScore": <number 0-100>,
@@ -340,11 +348,11 @@ Return ONLY valid JSON (no markdown, no commentary):
 Rules:
 - EXACTLY 5 items, ranks 1-5.
 - "title" is burned on screen as the rank label: 2-4 words, no punctuation. It must LITERALLY describe what is visible in that exact clip — plain and accurate, NOT exaggerated. (If a ref only points, say "REF POINTS", not "REF GETS TRUCKED". Don't invent objects/actions that may not be on screen.)
-- searchQuery: the SHORTEST phrase that uniquely identifies the moment so YouTube's top result is the real clip — usually just PERSON + ACTION (e.g. "Mark Sanchez butt fumble", "Adam Gase crazy eyes"). 2-5 words. Do NOT pad with team names, years, or filler like "clip/funny/moment/highlight" unless truly needed to find it — extra words pull in the wrong videos. Pick only moments famous enough that a real standalone clip exists.
+- searchQuery: a SPECIFIC, moment-focused phrase that surfaces the exact high-quality clip of THAT single peak moment — NOT a generic topic search. Bare topic queries like "Messi goals" or "NFL fails" return compilations/montages, never one clean moment, so AVOID them. Instead anchor to the precise moment and add the identifying + quality context that narrows to the real clip: PERSON + SPECIFIC ACTION + the helpful qualifiers among opponent / year / "close up" / "full HD" / "slow motion" (e.g. "Messi goal vs Real Madrid 2017 close up", "Messi dribble skill move full HD", "Mark Sanchez butt fumble slow motion"). Pick only moments specific/famous enough that a real standalone clip exists.
 - We want the RAW ACTION footage of the moment itself — NOT commentary, analysis, reaction videos, podcasts, or award/voting pages. Never include words like "analysis", "reaction", "react", "award", "vote", "puskas", "debate", "explained".
 - Every searchQuery and title must obviously match the EMOTION word from STEP 1. If you can't justify why it's e.g. funny, pick a different moment.
 - clipDuration: integer seconds 5-7 only.
-- peakOffsetPct: where the payoff happens as a % through a typical clip from this query (a buzzer beater ≈ 80, an instant reaction ≈ 40).`,
+- peakOffsetPct: where the single highest-action PEAK moment lands as a % through the chosen segment. Aim for the MIDDLE THIRD (≈ 34-66) so there is 1-2s of buildup before it and 1-2s of reaction after it — never put the peak at the very start or very end of the segment.`,
       },
     ],
   });
@@ -812,6 +820,48 @@ async function synthVoice(
 
 /* ───────────────────── Ranking overlay (drawtext) ────────────────────── */
 
+const TITLE_X = 230;
+const TITLE_MAX_WIDTH = OUT_W - TITLE_X - 48;
+const TITLE_MIN_FONT = 32;
+/** Approximate Anton uppercase glyph width as a fraction of fontsize. */
+const TITLE_CHAR_W_RATIO = 0.56;
+
+function titleTextWidth(text: string, fontSize: number): number {
+  return text.length * fontSize * TITLE_CHAR_W_RATIO;
+}
+
+// Scale fontsize down to fit one line; wrap to a second line only if still too wide at min size.
+function layoutRankTitle(
+  rawTitle: string,
+  baseSize: number,
+): { text: string; size: number }[] {
+  const text = rawTitle.toUpperCase();
+  let size = baseSize;
+  if (titleTextWidth(text, size) > TITLE_MAX_WIDTH) {
+    size = Math.max(
+      TITLE_MIN_FONT,
+      Math.floor(TITLE_MAX_WIDTH / (text.length * TITLE_CHAR_W_RATIO)),
+    );
+  }
+  if (titleTextWidth(text, size) <= TITLE_MAX_WIDTH) {
+    return [{ text, size }];
+  }
+
+  const lines: string[] = [];
+  let cur = "";
+  for (const word of text.split(/\s+/)) {
+    const trial = cur ? `${cur} ${word}` : word;
+    if (titleTextWidth(trial, size) <= TITLE_MAX_WIDTH) {
+      cur = trial;
+    } else {
+      if (cur) lines.push(cur);
+      cur = word;
+    }
+  }
+  if (cur) lines.push(cur);
+  return lines.slice(0, 2).map((t) => ({ text: t, size }));
+}
+
 function drawtext(
   text: string,
   size: number,
@@ -879,15 +929,16 @@ function buildRankOverlay(
     );
 
     if (revealed) {
-      const title = row.title.length > 22 ? row.title.slice(0, 21) + "…" : row.title;
       const titleSize = active ? 60 : 46;
       const titleAlpha = active ? "if(lt(t,0.35),max(0,(t-0.1)/0.25),1)" : "0.96";
       const ty = active ? y + 30 : y + 26;
-      filters.push(
-        drawtext(title.toUpperCase(), titleSize, "0xFFFFFF", "230", ty, {
-          alpha: titleAlpha,
-        }),
-      );
+      for (const [li, line] of layoutRankTitle(row.title, titleSize).entries()) {
+        filters.push(
+          drawtext(line.text, line.size, "0xFFFFFF", String(TITLE_X), ty + li * Math.round(line.size * 1.08), {
+            alpha: titleAlpha,
+          }),
+        );
+      }
     }
   }
 
